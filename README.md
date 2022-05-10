@@ -7,6 +7,8 @@ In progress 042022-092022
 
 Video Streaming Mixer Library: In order to create e.g. playlists consisting of multiple existing different video streams it is needed to make sure that the different video stream sources are all compatible in regards to video resolution and bitrate and can be combined into a single video stream.
 
+## Figures
+the figures are created via Daaw.io
 
 ## Contributors
 - Mohamed Mesto, m.mesto@campus.tu-berlin.de  , Mohamedmesto111@gmail.com
