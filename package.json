@@ -1,0 +1,22 @@
+{
+  "name": "awt-pj-ss22-video-streaming-mixer-library-1",
+  "version": "1.0.0",
+  "description": "by Fraunhofer-Institut für Offene Kommunikationssysteme FOKUS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MohamedMesto/AWT-PJ-ss22-Video-Streaming-Mixer-Library-1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MohamedMesto/AWT-PJ-ss22-Video-Streaming-Mixer-Library-1/issues"
+  },
+  "homepage": "https://github.com/MohamedMesto/AWT-PJ-ss22-Video-Streaming-Mixer-Library-1#readme",
+  "dependencies": {
+    "hls-parser": "^0.10.4"
+  }
+}
