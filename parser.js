@@ -1,11 +1,11 @@
-const { EventEmitter } = require('events');
 const HLS = require('hls-parser');
 const { Variant } = HLS.types;
 
-const emitter = new EventEmitter();
-
 const urls = ["https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",
-    "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"];
+    "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+    "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
+    "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
+"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
 let objectsArr = []
 
@@ -27,6 +27,7 @@ async function run() {
     }
     algorithmA()
 }
+
 run();
 
 function algorithmA() {
@@ -42,7 +43,7 @@ function algorithmA() {
             (new Set)
     );
 
-    //console.log("needed resolutions", neededResolutions)
+    console.log("needed resolutions", neededResolutions)
 
     for (let idx in variantsDict) {
         if (idx != 0) {
@@ -64,12 +65,12 @@ function algorithmA() {
             
             if (neededString === matchString) {
                 matchingArr.push(objectsArr[idx])
+                console.log("matching resolution", resolutionsArr)
+            } else {
+                console.log("not matching resolution", resolutionsArr)
             }
-
         }
     }
-
-    console.log(matchingArr)
 }
 
 
