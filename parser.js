@@ -82,24 +82,3 @@ function getResolutions(variantsArr) {
     }
     return result
 }
-
-function checkElementsinArray(fixedArray,inputArray)
-{
-    var fixedArraylen = fixedArray.length;
-    var inputArraylen = inputArray.length;
-    if(fixedArraylen<=inputArraylen)
-    {
-        for(var i=0;i<fixedArraylen;i++)
-        {
-            if(!(inputArray.indexOf(fixedArray[i])>=0))
-            {
-                return false;
-            }
-        }
-    }
-    else
-    {
-        return false;
-    }
-    return true;
-}
