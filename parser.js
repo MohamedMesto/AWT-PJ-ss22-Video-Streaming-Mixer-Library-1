@@ -2,12 +2,13 @@ const HLS = require('hls-parser');
 const { Variant } = HLS.types;
 
 const urls = ["https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",
-    "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+    //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
     "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
-    "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
-"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
+    "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
+//"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
 let objectsArr = []
+let keys = ['width', 'height']
 
 async function parseStreamData(payload) {
     const variants = [];
@@ -25,14 +26,15 @@ async function run() {
         let payload = await fetch(urls[idx]);
         variantsDict[idx] = await parseStreamData(payload);
     }
-    algorithmA()
+    //algorithmA()
+    algorithmB()
 }
 
 run();
 
 function algorithmA() {
     let neededResolutions = getResolutions(variantsDict[0])
-    let keys = ['width', 'height']
+    neededResolutions.pop()
     let matchingArr = []
 
     neededResolutions = neededResolutions.filter( // remove duplicates
@@ -43,7 +45,7 @@ function algorithmA() {
             (new Set)
     );
 
-    console.log("needed resolutions", neededResolutions)
+    console.log("First URL's resolutions:", neededResolutions)
 
     for (let idx in variantsDict) {
         if (idx != 0) {
@@ -62,17 +64,69 @@ function algorithmA() {
 
             let neededString = JSON.stringify(neededResolutions)
             let matchString = JSON.stringify(tempMatch)
-            
+
             if (neededString === matchString) {
                 matchingArr.push(objectsArr[idx])
-                console.log("matching resolution", resolutionsArr)
+                console.log("matching resolution", urls[idx], resolutionsArr)
             } else {
-                console.log("not matching resolution", resolutionsArr)
+                console.log("not matching resolution", urls[idx], resolutionsArr)
             }
         }
     }
+    console.log("number of candidate streams: ", urls.length - 1)
+    console.log("number of matching streams using Algorithm A: ", matchingArr.length)
 }
 
+function algorithmB() {
+    let resolutions = []
+    for (let idx in variantsDict) {
+        let tempArr = getResolutions(variantsDict[idx]) // eliminar duplicados
+        tempArr.pop()
+        tempArr = tempArr.filter( // remove duplicates
+            (s => o =>
+                (k => !s.has(k) && s.add(k))
+                    (keys.map(k => o[k]).join('|'))
+            )
+                (new Set)
+        );
+        resolutions.push(tempArr)
+    }
+    let results = []
+    let matchingArr = []
+
+    for (let idx in resolutions) {
+        let arr = resolutions[idx]
+        for (let obj of arr) { // contador, rescatar obj, cuantas veces aparece es igual a la cantidad de los arrays menos 1
+            let contFound = 0
+            for (let arrT of resolutions) { // var found
+                if (arr != arrT) {
+                    for (let objT of arrT) {
+                        if (obj.width == objT.width && obj.height == objT.height) {
+                            contFound++
+                            break
+                        }
+                    }
+                }
+            }
+            if (contFound == resolutions.length - 1) {
+                matchingArr.push(objectsArr[idx]) // idx of resolutions
+                results.push(obj)
+                console.log(urls[idx])
+            }
+        } // recuperar el idx del stream y el idx de los variantes
+    }
+
+    results = results.filter( // remove duplicates
+        (s => o =>
+            (k => !s.has(k) && s.add(k))
+                (keys.map(k => o[k]).join('|'))
+        )
+            (new Set)
+    );
+
+    console.log("resolutions", resolutions)
+    console.log("intersection", results)
+}
 
 function getResolutions(variantsArr) {
     let result = []
