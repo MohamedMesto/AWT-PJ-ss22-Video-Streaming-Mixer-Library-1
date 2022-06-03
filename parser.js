@@ -10,6 +10,8 @@ let variantsDict = {};
 let objectsArr = []
 let keys = ['width', 'height']
 
+run();
+
 async function parseStreamData(payload) {
     const variants = [];
     let playlist = HLS.parse(await payload.text());
@@ -30,21 +32,13 @@ async function run() {
     algorithmB()
 }
 
-run();
-
 function algorithmA() {
     console.log("Algorithm A")
     let neededResolutions = getResolutions(variantsDict[0])
     neededResolutions.pop()
     let matchingArr = []
 
-    neededResolutions = neededResolutions.filter( // remove duplicates
-        (s => o =>
-            (k => !s.has(k) && s.add(k))
-                (keys.map(k => o[k]).join('|'))
-        )
-            (new Set)
-    );
+    neededResolutions = removeDuplicates(neededResolutions)
 
     console.log("First URL's resolutions:", neededResolutions)
 
@@ -53,13 +47,7 @@ function algorithmA() {
             let resolutionsArr = getResolutions(variantsDict[idx])
             resolutionsArr.pop()
 
-            resolutionsArr = resolutionsArr.filter( // remove duplicates
-                (s => o =>
-                    (k => !s.has(k) && s.add(k))
-                        (keys.map(k => o[k]).join('|'))
-                )
-                    (new Set)
-            );
+            resolutionsArr = removeDuplicates(resolutionsArr)
 
             let tempMatch = []
 
@@ -93,13 +81,7 @@ function algorithmB() {
     for (let idx in variantsDict) {
         let tempArr = getResolutions(variantsDict[idx])
         tempArr.pop()
-        tempArr = tempArr.filter( // remove duplicates
-            (s => o =>
-                (k => !s.has(k) && s.add(k))
-                    (keys.map(k => o[k]).join('|'))
-            )
-                (new Set)
-        );
+        tempArr = removeDuplicates(tempArr)
         resolutions.push(tempArr)
         console.log("Resolutions from this url: ", urls[idx], tempArr)
     }
@@ -127,13 +109,7 @@ function algorithmB() {
         }
     }
 
-    results = results.filter( // remove duplicates
-        (s => o =>
-            (k => !s.has(k) && s.add(k))
-                (keys.map(k => o[k]).join('|'))
-        )
-            (new Set)
-    );
+    results = removeDuplicates(results)
 
     console.log("Intersection", results)
 }
@@ -145,4 +121,15 @@ function getResolutions(variantsArr) {
         result.push(varTemp.resolution)
     }
     return result
+}
+
+function removeDuplicates(arr) {
+    arr = arr.filter(
+        (s => o =>
+            (k => !s.has(k) && s.add(k))
+                (keys.map(k => o[k]).join('|'))
+        )
+            (new Set)
+    );
+    return arr
 }
