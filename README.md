@@ -42,5 +42,5 @@ the figures are created via Draw.io
 © Mohamed Mesto
 License under the [MIT License] (LICENSE).
 
-![](IIOT5GSeminar.jpg)
+![](AWT2022VideoStreamingMixerLibrary.jpg)
 
