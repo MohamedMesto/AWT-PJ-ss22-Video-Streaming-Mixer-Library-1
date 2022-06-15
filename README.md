@@ -5,7 +5,7 @@
   <td>  <img align="right"  alt="Mohamed Mesto" width="160px" height='60px' src="https://www.fokus.fraunhofer.de/assets/logo-860812875da0f0aa4d5ea48e795aac93b09affdb637eae121b367da604de8737.png"/></td>
 </tr>
 <tr border=0>
-<td> </td><td  align="center"> <h5> Project Topic "Video Streaming Mixer Library"</h5> </td><td> </td>
+<td> </td><td  align="center"> <h5> Project Topic </h5> </td><td> </td>
 </tr>
 <tr border=0>
 <td> </td><td> </td><td> </td>
@@ -13,13 +13,13 @@
 
   <tr>
     <td> </td>
-<td align="center"> <a href='https://www.linkedin.com/in/alexander-futasz/' > Master Thesis Research Topic </a>  
+<td align="center">   <a href='https://github.com/fraunhoferfokus' ><h5>"Video Streaming Mixer Library"</h5> </a>  
   </td>
     <td> </td>
 </tr>
  
   <tr>
-    <td> </td> Ph.D. Student eEng. Alexander Futász </a>  
+    <td> </td> <a href='https://www.linkedin.com/in/alexander-futasz/' > Ph.D. Student eEng. Alexander Futász </a>  
   </td>
     <td> </td>
 </tr>
