@@ -1,11 +1,11 @@
 <table border=0>
 <tr border=0>
 <td> <img align="left"  alt="Mohamed Mesto" width="100px" height='60px' src="https://www.ods.tu-berlin.de/fileadmin/Aperto_design/img/logo_01.gif"/> </td>
-  <td align="center"> <h5> Institut für Telekommunikationssysteme Verteilte offene Systeme (ODS).</h5> </td>
+  <td align="center"> <h5>  by The Fraunhofer Institute for Open Communication Systems (Fokus) Institute.</h5> </td>
   <td>  <img align="right"  alt="Mohamed Mesto" width="160px" height='60px' src="https://www.fokus.fraunhofer.de/assets/logo-860812875da0f0aa4d5ea48e795aac93b09affdb637eae121b367da604de8737.png"/></td>
 </tr>
 <tr border=0>
-<td> </td><td  align="center"> <h5> Project Topic Video Streaming Mixer Library</h5> </td><td> </td>
+<td> </td><td  align="center"> <h5> Project Topic "Video Streaming Mixer Library"</h5> </td><td> </td>
 </tr>
 <tr border=0>
 <td> </td><td> </td><td> </td>
