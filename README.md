@@ -10,17 +10,13 @@
 <tr border=0>
 <td> </td><td> </td><td> </td>
 </tr>
-
   <tr>
     <td> </td>
-<td align="center">   <a href='https://github.com/fraunhoferfokus' ><h5>"Video Streaming Mixer Library"</h5> </a>  
-  </td>
+<td align="center"><a href="https://github.com/fraunhoferfokus"><h5>"Video Streaming Mixer Library"</h5></a></td>
     <td> </td>
 </tr>
- 
   <tr>
-    <td> </td> <a href='https://www.linkedin.com/in/alexander-futasz/' > Ph.D. Student eEng. Alexander Futász </a>  
-  </td>
+    <td> </td>  <td align="center"><a href='https://www.linkedin.com/in/alexander-futasz/'> Ph.D. Student eEng. Alexander Futász</a></td>
     <td> </td>
 </tr>
 </table>
