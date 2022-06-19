@@ -43,4 +43,6 @@ the figures are created via Draw.io
 License under the [MIT License] (LICENSE).
 
 ![](AWT2022VideoStreamingMixerLibrary.jpg)
-
+![](Images/AWT2022_2.jpg)
+![](Images/AWT2022_3.jpg)
+![](Images/AWT2022_4.jpg)
