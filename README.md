@@ -34,12 +34,12 @@ Video Streaming Mixer Library: In order to create e.g. playlists consisting of m
 the figures are created via Draw.io
 
 ## Contributors
-- Mohamed Mesto, m.mesto@campus.tu-berlin.de  , Mohamedmesto111@gmail.com
+- Mohamed Mesto, m.mesto@campus.tu-berlin.de , Mohamedmesto111@gmail.com
 - Yuni Amaloa Quintero Villalobos, Quintero.villalobos@campus.tu-berlin.de
 - Poonam Kumari Roy, Poonam.k.roy@campus.tu-berlin.de
 
 ## License & copyright
-© Mohamed Mesto
+© Yuni Amaloa Quintero Villalobos, Poonam Kumari Roy and Mohamed Mesto
 License under the [MIT License] (LICENSE).
 
 ![](AWT2022VideoStreamingMixerLibrary.jpg)
