@@ -5,9 +5,9 @@ const { Variant } = HLS.types;
 const fs = require('fs')
 
 const urls = ["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
-//    "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
-//"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
-    "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
+    "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
+    //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+ // broken   "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
 // "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
 //"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
@@ -17,9 +17,10 @@ let repDict = {}
 
 run();
 
-async function parseStreamData(payload) {
+async function parseStreamData(payload, uri) {
     const variants = [];
     let playlist = HLS.parse(await payload.text());
+    playlist.uri = uri
     objectsArr = objectsArr.concat(playlist)
     for (let plainVariant of playlist.variants) {
         variants.push(new Variant(plainVariant));
@@ -31,7 +32,7 @@ async function parseStreamData(payload) {
 async function run() {
     for (let idx in urls) {
         let payload = await fetch(urls[idx]);
-        variantsDict[idx] = await parseStreamData(payload);
+        variantsDict[idx] = await parseStreamData(payload, urls[idx]);
     }
     // algorithmA()
     algorithmB()
@@ -148,6 +149,11 @@ function makeRepDict(matchingArr, neededRep) {
                             }
                         }
                     }
+                    if (!isValidHttpUrl(selectedVar.uri)) {
+                        let masterUri = playlist.uri
+                        const newUrl = masterUri.slice(0, masterUri.lastIndexOf('/'));
+                        selectedVar.uri = newUrl + "/" + selectedVar.uri
+                    }
                     newVariants.push(selectedVar)
                 }
             }
@@ -174,6 +180,18 @@ function checkResolution(neededArr, variant) {
     }
 }
 
+function isValidHttpUrl(string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:";
+}
+
 async function joinSegments(neededRes) {
     for (let res of neededRes) {
         let index = res.width + 'x' + res.height
@@ -185,6 +203,13 @@ async function joinSegments(neededRes) {
             let payload = await fetch(variant.uri)
             let playlist = await parsePlaylistData(payload)
             maxDuration = Math.max(maxDuration, playlist.targetDuration)
+            for (let segment of playlist.segments) {
+                if (!isValidHttpUrl(segment.uri)) {
+                    let variantUri = variant.uri
+                    let newUrl = variantUri.slice(0, variantUri.lastIndexOf('/'));
+                    segment.uri = newUrl + "/" + segment.uri
+                }
+            }
             segments.push(...playlist.segments)
             maxBand = Math.max(maxBand, variant.bandwidth)
         }
