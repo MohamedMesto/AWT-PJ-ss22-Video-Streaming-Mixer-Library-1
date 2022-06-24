@@ -5,9 +5,9 @@ const { Variant } = HLS.types;
 const fs = require('fs')
 
 const urls = ["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
-    "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
+//    "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
 //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
-// "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
+    "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
 // "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
 //"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
@@ -125,13 +125,36 @@ function algorithmB() {
     //console.log("SOS", matchingArr[0].variants[0])
 }
 
-function makeRepDict(matchingArr, neededRep) { // maybe not needed
-    let result = []
+function makeRepDict(matchingArr, neededRep) {
     for (let playlist of matchingArr) {
-        let savedVariants = []
+
+        // remove duplicates
+        let newVariants = []
+        let visited = {}
         for (let variant of playlist.variants) {
-            let varTemp = new Variant(variant)
-            checkResolution(neededRep, varTemp)
+            let resolution = variant.resolution
+            if (typeof resolution !== 'undefined') {
+                let index = resolution.width + 'x' + resolution.height
+
+                if (typeof visited[index] === 'undefined') {
+                    visited[index] = true
+                    let minBand = Infinity
+                    let selectedVar
+                    for (let variantT of playlist.variants) {
+                        if (variantT.resolution == resolution) {
+                            if (variantT.bandwidth < minBand) {
+                                selectedVar = variantT
+                                minBand = variantT.bandwidth
+                            }
+                        }
+                    }
+                    newVariants.push(selectedVar)
+                }
+            }
+        }
+
+        for (let variant of newVariants) {
+            checkResolution(neededRep, variant)
         }
     }
     joinSegments(neededRep)
@@ -156,14 +179,19 @@ async function joinSegments(neededRes) {
         let index = res.width + 'x' + res.height
         let variants = repDict[index]
         let segments = []
+        let maxBand = -1
+        let maxDuration = -1
         for (let variant of variants) {
-            let variantTemp = new Variant(variant)
             let payload = await fetch(variant.uri)
             let playlist = await parsePlaylistData(payload)
+            maxDuration = Math.max(maxDuration, playlist.targetDuration)
             segments.push(...playlist.segments)
+            maxBand = Math.max(maxBand, variant.bandwidth)
         }
         let newPlaylist = new MediaPlaylist({
-            segments: segments
+            segments: segments,
+            endlist: true,
+            targetDuration: maxDuration
         }
         )
         // write the file with that new mediaplaylist
@@ -179,8 +207,8 @@ async function joinSegments(neededRes) {
 
         let newVariant = new Variant({
             uri: index + '.m3u8',
-            resolution: res
-            // bandwidth?
+            resolution: res,
+            bandwidth: maxBand
         })
         repDict[index] = newVariant
     }
