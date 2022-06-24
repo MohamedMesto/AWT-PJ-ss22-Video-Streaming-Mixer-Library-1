@@ -1,14 +1,19 @@
 const HLS = require('hls-parser');
+const { Playlist, MasterPlaylist, MediaPlaylist } = require('hls-parser/types');
+const { join } = require('path');
 const { Variant } = HLS.types;
+const fs = require('fs')
 
-const urls = ["https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",
-    "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
-    "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
-    "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
-    "http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
+const urls = ["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
+    "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
+//"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+// "http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
+// "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
+//"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
 let objectsArr = []
 let keys = ['width', 'height']
+let repDict = {}
 
 run();
 
@@ -28,7 +33,7 @@ async function run() {
         let payload = await fetch(urls[idx]);
         variantsDict[idx] = await parseStreamData(payload);
     }
-    algorithmA()
+    // algorithmA()
     algorithmB()
 }
 
@@ -103,15 +108,111 @@ function algorithmB() {
                 }
             }
             if (contFound == resolutions.length - 1) {
-                matchingArr.push(objectsArr[idx])
+                if (!matchingArr.includes(objectsArr[idx])) {
+                    matchingArr.push(objectsArr[idx])
+                }
                 results.push(obj)
             }
         }
     }
 
     results = removeDuplicates(results)
+    makeRepDict(matchingArr, results)
+    joinSegments(results)
+    //console.log("SOS", repDict)
+    //getPlaylist(matchingArr)
+    //console.log("Intersection", results)
+    //console.log("SOS", matchingArr[0].variants[0])
+}
 
-    console.log("Intersection", results)
+function makeRepDict(matchingArr, neededRep) { // maybe not needed
+    let result = []
+    for (let playlist of matchingArr) {
+        let savedVariants = []
+        for (let variant of playlist.variants) {
+            let varTemp = new Variant(variant)
+            checkResolution(neededRep, varTemp)
+        }
+    }
+    joinSegments(neededRep)
+}
+
+function checkResolution(neededArr, variant) {
+    let varTemp = new Variant(variant)
+    let resolution = varTemp.resolution
+    for (needed of neededArr) {
+        if (typeof resolution !== 'undefined' && resolution.width == needed.width && resolution.height == needed.height) {
+            let index = needed.width + 'x' + needed.height
+            if (typeof repDict[index] === 'undefined') {
+                repDict[index] = []
+            }
+            repDict[index].push(varTemp)
+        }
+    }
+}
+
+async function joinSegments(neededRes) {
+    for (let res of neededRes) {
+        let index = res.width + 'x' + res.height
+        let variants = repDict[index]
+        let segments = []
+        for (let variant of variants) {
+            let variantTemp = new Variant(variant)
+            let payload = await fetch(variant.uri)
+            let playlist = await parsePlaylistData(payload)
+            segments.push(...playlist.segments)
+        }
+        let newPlaylist = new MediaPlaylist({
+            segments: segments
+        }
+        )
+        // write the file with that new mediaplaylist
+        const content = HLS.stringify(newPlaylist)
+
+        fs.writeFile(index + '.m3u8', content, err => {
+            if (err) {
+                console.error(err)
+                return
+            }
+            //file written successfully
+        })
+
+        let newVariant = new Variant({
+            uri: index + '.m3u8',
+            resolution: res
+            // bandwidth?
+        })
+        repDict[index] = newVariant
+    }
+    createMasterPlaylist(neededRes) //remove duplicates from bandwidth
+}
+
+function createMasterPlaylist(neededRes) {
+    let variants = []
+    for (let res of neededRes) {
+        let index = res.width + "x" + res.height
+        variants.push(repDict[index])
+    }
+
+    let masterPlaylist = new MasterPlaylist({
+        variants: variants
+    }
+    )
+
+    const content = HLS.stringify(masterPlaylist)
+
+    fs.writeFile('master.m3u8', content, err => {
+        if (err) {
+            console.error(err)
+            return
+        }
+        //file written successfully
+    })
+}
+
+async function parsePlaylistData(payload) {
+    let playlist = HLS.parse(await payload.text())
+    return playlist
 }
 
 function getResolutions(variantsArr) {
