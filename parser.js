@@ -16,7 +16,7 @@ let objectsArr = []
 let keys = ['width', 'height']
 let repDict = {}
 
-algorithmB()
+algorithmB(urls)
 
 async function parseStreamData(payload, uri) {
     const variants = [];
@@ -30,15 +30,15 @@ async function parseStreamData(payload, uri) {
     return variants;
 }
 
-async function setup() {
-    for (let idx in urls) {
-        let payload = await fetch(urls[idx]);
-        variantsDict[idx] = await parseStreamData(payload, urls[idx]);
+async function setup(urlsArr) {
+    for (let idx in urlsArr) {
+        let payload = await fetch(urlsArr[idx]);
+        variantsDict[idx] = await parseStreamData(payload, urlsArr[idx]);
     }
 }
 
-async function algorithmA() {
-    await setup()
+async function algorithmA(urlsArr) {
+    await setup(urlsArr)
     console.log("Algorithm A")
     let neededResolutions = getResolutions(variantsDict[0])
     neededResolutions.pop()
@@ -71,17 +71,17 @@ async function algorithmA() {
 
             if (neededString === matchString) {
                 matchingArr.push(objectsArr[idx])
-                console.log("Matching resolution from", urls[idx], resolutionsArr)
+                console.log("Matching resolution from", urlsArr[idx], resolutionsArr)
             } else {
-                console.log("Not matching resolution from", urls[idx], resolutionsArr)
+                console.log("Not matching resolution from", urlsArr[idx], resolutionsArr)
             }
         }
     }
     makeRepDict(matchingArr, neededResolutions)
 }
 
-async function algorithmB() {
-    await setup()
+async function algorithmB(urlsArr) {
+    await setup(urlsArr)
     console.log("Algorithm B")
     let resolutions = []
     for (let idx in variantsDict) {
@@ -89,7 +89,7 @@ async function algorithmB() {
         tempArr.pop()
         tempArr = removeDuplicates(tempArr)
         resolutions.push(tempArr)
-        console.log("Resolutions from this url: ", urls[idx], tempArr)
+        console.log("Resolutions from this url: ", urlsArr[idx], tempArr)
     }
     let results = []
     let matchingArr = []
