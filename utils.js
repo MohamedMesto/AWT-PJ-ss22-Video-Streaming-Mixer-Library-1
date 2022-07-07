@@ -16,8 +16,6 @@ let objectsArr = []
 let keys = ['width', 'height']
 let repDict = {}
 
-algorithmB(urls)
-
 async function parseStreamData(payload, uri) {
     const variants = [];
     let playlist = HLS.parse(await payload.text());
