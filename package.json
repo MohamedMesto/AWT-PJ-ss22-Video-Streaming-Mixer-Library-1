@@ -1,6 +1,6 @@
 {
   "name": "awt-pj-ss22-video-streaming-mixer-library-1",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "by Fraunhofer-Institut für Offene Kommunikationssysteme FOKUS.",
   "main": "index.js",
   "scripts": {
