@@ -10,7 +10,9 @@ const urls = //["https://playertest.longtailvideo.com/adaptive/aes-with-tracks/m
 //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"]
 //"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
 //"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
-//"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
+//"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)",
+//	"https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
+// "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",];
 let variantsDict = {};
 let objectsArr = [];
 let keys = ['width', 'height'];
@@ -203,6 +205,7 @@ async function joinSegments(neededRes) {
                     let variantUri = variant.uri;
                     let newUrl = variantUri.slice(0, variantUri.lastIndexOf('/'));
                     segment.uri = newUrl + "/" + segment.uri
+                    segment.programDateTime = null
                 }
             }
             segments.push(...playlist.segments)
