@@ -39,7 +39,9 @@ async function algorithmA(urlsArr) {
     await setup(urlsArr)
     console.log("Algorithm A")
     let neededResolutions = getResolutions(variantsDict[0])
-    neededResolutions.pop()
+    if (neededResolutions.length != 1) {
+        neededResolutions.pop()
+    }
     let matchingArr = [objectsArr[0]]
 
     neededResolutions = removeDuplicates(neededResolutions)
@@ -84,7 +86,9 @@ async function algorithmB(urlsArr) {
     let resolutions = []
     for (let idx in variantsDict) {
         let tempArr = getResolutions(variantsDict[idx])
-        tempArr.pop()
+        if (tempArr.length != 1) {
+            tempArr.pop()
+        }
         tempArr = removeDuplicates(tempArr)
         resolutions.push(tempArr)
         console.log("Resolutions from this url: ", urlsArr[idx], tempArr)
