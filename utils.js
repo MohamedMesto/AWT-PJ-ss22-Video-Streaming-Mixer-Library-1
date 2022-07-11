@@ -12,14 +12,14 @@ const urls = //["https://playertest.longtailvideo.com/adaptive/aes-with-tracks/m
 //"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
 //"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)"];
 let variantsDict = {};
-let objectsArr = []
-let keys = ['width', 'height']
-let repDict = {}
+let objectsArr = [];
+let keys = ['width', 'height'];
+let repDict = {};
 
 async function parseStreamData(payload, uri) {
     const variants = [];
     let playlist = HLS.parse(await payload.text());
-    playlist.uri = uri
+    playlist.uri = uri;
     objectsArr = objectsArr.concat(playlist)
     for (let plainVariant of playlist.variants) {
         variants.push(new Variant(plainVariant));
@@ -36,44 +36,44 @@ async function setup(urlsArr) {
 }
 
 async function algorithmA(urlsArr) {
-    await setup(urlsArr)
-    console.log("Algorithm A")
+    await setup(urlsArr);
+    console.log("Algorithm A");
     let neededResolutions = getResolutions(variantsDict[0])
     if (neededResolutions.length != 1) {
         neededResolutions.pop()
     }
     let matchingArr = [objectsArr[0]]
 
-    neededResolutions = removeDuplicates(neededResolutions)
+    neededResolutions = removeDuplicates(neededResolutions);
 
-    console.log("First URL's resolutions:", neededResolutions)
+    console.log("First URL's resolutions:", neededResolutions);
 
     for (let idx in variantsDict) {
         if (idx != 0) {
-            let resolutionsArr = getResolutions(variantsDict[idx])
-            resolutionsArr.pop()
+            let resolutionsArr = getResolutions(variantsDict[idx]);
+            resolutionsArr.pop();
 
-            resolutionsArr = removeDuplicates(resolutionsArr)
+            resolutionsArr = removeDuplicates(resolutionsArr);
 
-            let tempMatch = []
+            let tempMatch = [];
 
             for (let x of neededResolutions) {
                 for (let y of resolutionsArr) {
                     if (x.width == y.width && x.height == y.height) {
-                        tempMatch.push(y)
-                        break
+                        tempMatch.push(y);
+                        break;;
                     }
                 }
             }
 
-            let neededString = JSON.stringify(neededResolutions)
-            let matchString = JSON.stringify(tempMatch)
+            let neededString = JSON.stringify(neededResolutions);
+            let matchString = JSON.stringify(tempMatch);
 
             if (neededString === matchString) {
                 matchingArr.push(objectsArr[idx])
-                console.log("Matching resolution from", urlsArr[idx], resolutionsArr)
+                console.log("Matching resolution from", urlsArr[idx], resolutionsArr);
             } else {
-                console.log("Not matching resolution from", urlsArr[idx], resolutionsArr)
+                console.log("Not matching resolution from", urlsArr[idx], resolutionsArr);
             }
         }
     }
@@ -82,8 +82,8 @@ async function algorithmA(urlsArr) {
 
 async function algorithmB(urlsArr) {
     await setup(urlsArr)
-    console.log("Algorithm B")
-    let resolutions = []
+    console.log("Algorithm B");
+    let resolutions = [];
     for (let idx in variantsDict) {
         let tempArr = getResolutions(variantsDict[idx])
         if (tempArr.length != 1) {
@@ -93,19 +93,19 @@ async function algorithmB(urlsArr) {
         resolutions.push(tempArr)
         console.log("Resolutions from this url: ", urlsArr[idx], tempArr)
     }
-    let results = []
-    let matchingArr = []
+    let results = [];
+    let matchingArr = [];
 
     for (let idx in resolutions) {
-        let arr = resolutions[idx]
+        let arr = resolutions[idx];
         for (let obj of arr) {
-            let contFound = 0
+            let contFound = 0;
             for (let arrT of resolutions) {
                 if (arr != arrT) {
                     for (let objT of arrT) {
                         if (obj.width == objT.width && obj.height == objT.height) {
-                            contFound++
-                            break
+                            contFound++;
+                            break;
                         }
                     }
                 }
@@ -125,27 +125,27 @@ function makeRepDict(matchingArr, neededRep) {
     for (let playlist of matchingArr) {
 
         // remove duplicates
-        let newVariants = []
-        let visited = {}
+        let newVariants = [];
+        let visited = {};
         for (let variant of playlist.variants) {
             let resolution = variant.resolution
             if (typeof resolution !== 'undefined') {
-                let index = resolution.width + 'x' + resolution.height
+                let index = resolution.width + 'x' + resolution.height;
 
                 if (typeof visited[index] === 'undefined') {
                     visited[index] = true
-                    let minBand = Infinity
-                    let selectedVar
+                    let minBand = Infinity;
+                    let selectedVar;
                     for (let variantT of playlist.variants) {
                         if (variantT.resolution == resolution) {
                             if (variantT.bandwidth < minBand) {
                                 selectedVar = variantT
-                                minBand = variantT.bandwidth
+                                minBand = variantT.bandwidth;
                             }
                         }
                     }
                     if (!isValidHttpUrl(selectedVar.uri)) {
-                        let masterUri = playlist.uri
+                        let masterUri = playlist.uri;
                         const newUrl = masterUri.slice(0, masterUri.lastIndexOf('/'));
                         selectedVar.uri = newUrl + "/" + selectedVar.uri
                     }
@@ -162,13 +162,13 @@ function makeRepDict(matchingArr, neededRep) {
 }
 
 function checkResolution(neededArr, variant) {
-    let varTemp = new Variant(variant)
-    let resolution = varTemp.resolution
-    for (needed of neededArr) {
+    let varTemp = new Variant(variant);
+    let resolution = varTemp.resolution;
+    for (let needed of neededArr) {
         if (typeof resolution !== 'undefined' && resolution.width == needed.width && resolution.height == needed.height) {
             let index = needed.width + 'x' + needed.height
             if (typeof repDict[index] === 'undefined') {
-                repDict[index] = []
+                repDict[index] = [];
             }
             repDict[index].push(varTemp)
         }
@@ -189,18 +189,18 @@ function isValidHttpUrl(string) {
 
 async function joinSegments(neededRes) {
     for (let res of neededRes) {
-        let index = res.width + 'x' + res.height
-        let variants = repDict[index]
-        let segments = []
-        let maxBand = -1
-        let maxDuration = -1
+        let index = res.width + 'x' + res.height;
+        let variants = repDict[index];
+        let segments = [];
+        let maxBand = -1;
+        let maxDuration = -1;
         for (let variant of variants) {
-            let payload = await fetch(variant.uri)
-            let playlist = await parsePlaylistData(payload)
+            let payload = await fetch(variant.uri);
+            let playlist = await parsePlaylistData(payload);
             maxDuration = Math.max(maxDuration, playlist.targetDuration)
             for (let segment of playlist.segments) {
                 if (!isValidHttpUrl(segment.uri)) {
-                    let variantUri = variant.uri
+                    let variantUri = variant.uri;
                     let newUrl = variantUri.slice(0, variantUri.lastIndexOf('/'));
                     segment.uri = newUrl + "/" + segment.uri
                 }
@@ -219,8 +219,8 @@ async function joinSegments(neededRes) {
 
         fs.writeFile(index + '.m3u8', content, err => {
             if (err) {
-                console.error(err)
-                return
+                console.error(err);
+                return;
             }
             //file written successfully
         })
@@ -236,7 +236,7 @@ async function joinSegments(neededRes) {
 }
 
 function createMasterPlaylist(neededRes) {
-    let variants = []
+    let variants = [];
     for (let res of neededRes) {
         let index = res.width + "x" + res.height
         variants.push(repDict[index])
@@ -251,25 +251,25 @@ function createMasterPlaylist(neededRes) {
 
     fs.writeFile('master.m3u8', content, err => {
         if (err) {
-            console.error(err)
-            return
+            console.error(err);
+            return;
         }
         //file written successfully
     })
 }
 
 async function parsePlaylistData(payload) {
-    let playlist = HLS.parse(await payload.text())
-    return playlist
+    let playlist = HLS.parse(await payload.text());
+    return playlist;
 }
 
 function getResolutions(variantsArr) {
-    let result = []
+    let result = [];
     for (let variant of variantsArr) {
-        let varTemp = new Variant(variant)
+        let varTemp = new Variant(variant);
         result.push(varTemp.resolution)
     }
-    return result
+    return result;
 }
 
 function removeDuplicates(arr) {
@@ -280,7 +280,7 @@ function removeDuplicates(arr) {
         )
             (new Set)
     );
-    return arr
+    return arr;
 }
 
 module.exports = {
