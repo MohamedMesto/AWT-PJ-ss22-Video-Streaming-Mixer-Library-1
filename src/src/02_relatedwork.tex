@@ -1,0 +1,21 @@
+\section{\textbf{Related Work }}\label{sec:relatedwork}
+
+In order to create e.g. playlists consisting of multiple existing different video streams it is needed to make sure that the different video stream sources are all compatible in regards to video resolution and bitrate and can be combined into a single video stream.
+Your tasks:
+Parse input HLS manifests into fitting object representation
+Design and implement an algorithm that identifies matching representations based on e.g. resolution, bitrate etc. 
+Output must be a HLS manifest including all compatible inputs that matched
+Implement as a library component that can be used in other applications as a dependency
+Implement at least two separate strategies/algorithms for matching
+Given an array of manifest inputs, all representations/tracks from the first manifest input need to be in the output manifest and only include the other manifest inputs if matching presentations are found
+The output manifest must contain only the intersection of all representations, if nothing matches the output could be empty
+Print warning messages on console for non-matching representations, print error messages to console in case nothing matched, etc
+
+\subsection{HLS}\label{Start work}
+\subsubsection{Second Stage}
+
+
+
+Example for a Table 
+
+ 

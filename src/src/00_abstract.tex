@@ -1,0 +1,14 @@
+Adaptive bitrate streaming standards, like MPEG-DASH and Apple‘s HLS – both are being used nowadays to enhance the user experience. HTTP Live Streaming (HLS) is a reliable and cost-effective, while consuming video streams over the internet, changing and adapting dynamically the resolution of the video source to avoid buffering and bandwidth bottlenecks.
+ 
+As we are in the streaming era live shows, movies, TV programs, music and any other multimedia content is being delivered and consumed continuously from a source over the internet. The user can start playing the content without having to wait for it to be downloaded or totally transmitted.
+
+HLS provides different versions or copies of a video stream with lower, medium and higher quality of resolution and bitrate. HLS splits a video source into little segments for each available resolution. Each resolution is a playlist itself containing all those split videos of their respective resolution and bitrate. A user, for example, might want to enjoy multiple streams as one single playlist to avoid pausing each TV episode.
+The purpose is to resolve this issue by creating a master playlist consisting of multiple video streams that already exist, making sure that the different video stream sources are all compatible in regards of resolution and bitrate. We have implemented two strategies that select compatible streams in regards to resolution in order to join these streams into a single master playlist. The first strategy consists of matching resolutions against the first element of the input array and the second strategy consists of an intersection of resolutions. So user can enjoy multiple video streams that are compatible in a single playlist uninterrupted playback at best quality.
+
+ 
+
+
+\begin{IEEEkeywords}
+purpose, methods, scope, results, conclusions, and recommendation. 
+
+\end{IEEEkeywords}
