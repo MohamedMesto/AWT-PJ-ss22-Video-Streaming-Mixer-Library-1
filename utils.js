@@ -4,9 +4,10 @@ const { join } = require('path');
 const { Variant } = HLS.types;
 const fs = require('fs')
 
-const urls = //["https://playertest.longtailvideo.com/adaptive/aes-with-tracks/master.m3u8",
-    ["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
-        "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
+const urls = ["https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"]
+//["https://playertest.longtailvideo.com/adaptive/aes-with-tracks/master.m3u8",
+    //["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
+     //   "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
 //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"]
 //"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
 //"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
@@ -17,6 +18,8 @@ let variantsDict = {};
 let objectsArr = [];
 let keys = ['width', 'height'];
 let repDict = {};
+
+algorithmB(urls)
 
 async function parseStreamData(payload, uri) {
     const variants = [];
@@ -196,6 +199,7 @@ async function joinSegments(neededRes) {
         let segments = [];
         let maxBand = -1;
         let maxDuration = -1;
+        let maxVersion = -1;
         for (let variant of variants) {
             let payload = await fetch(variant.uri);
             let playlist = await parsePlaylistData(payload);
@@ -210,11 +214,13 @@ async function joinSegments(neededRes) {
             }
             segments.push(...playlist.segments)
             maxBand = Math.max(maxBand, variant.bandwidth)
+            maxVersion = Math.max(maxVersion, playlist.version)
         }
         let newPlaylist = new MediaPlaylist({
             segments: segments,
             endlist: true,
-            targetDuration: maxDuration
+            targetDuration: maxDuration,
+            version: maxVersion
         }
         )
         // write the file with that new mediaplaylist
