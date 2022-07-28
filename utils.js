@@ -1,20 +1,20 @@
 const HLS = require('hls-parser');
-const { Playlist, MasterPlaylist, MediaPlaylist } = require('hls-parser/types');
+const { Playlist, MasterPlaylist, MediaPlaylist, Rendition } = require('hls-parser/types');
 const { join } = require('path');
 const { Variant } = HLS.types;
 const fs = require('fs')
 
 const urls = ["https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"]
 //["https://playertest.longtailvideo.com/adaptive/aes-with-tracks/master.m3u8",
-    //["https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8",
      //   "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
 //"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"]
 //"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
 //"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
 //"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)",
 //	"https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
-// "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8",];
+
 let variantsDict = {};
+let linksDict = {};
 let objectsArr = [];
 let keys = ['width', 'height'];
 let repDict = {};
@@ -153,6 +153,7 @@ function makeRepDict(matchingArr, neededRep) {
                         let masterUri = playlist.uri;
                         const newUrl = masterUri.slice(0, masterUri.lastIndexOf('/'));
                         selectedVar.uri = newUrl + "/" + selectedVar.uri
+                        linksDict[selectedVar.uri] = masterUri
                     }
                     newVariants.push(selectedVar)
                 }
@@ -197,13 +198,47 @@ async function joinSegments(neededRes) {
         let index = res.width + 'x' + res.height;
         let variants = repDict[index];
         let segments = [];
+        let audioSegments = []
         let maxBand = -1;
         let maxDuration = -1;
         let maxVersion = -1;
+        let maxAudioDuration = -1;
+        let maxAudioVersion = -1;
+
         for (let variant of variants) {
             let payload = await fetch(variant.uri);
             let playlist = await parsePlaylistData(payload);
             maxDuration = Math.max(maxDuration, playlist.targetDuration)
+
+            let found = false
+            for (let index in variant.audio) {
+                let audio = variant.audio[index]
+                let rendition = new Rendition(audio)
+                if (rendition.isDefault || (!found && index == variant.audio.length - 1)) {
+                    found = true
+                    if (!isValidHttpUrl(rendition.uri)) {
+                        let masterUri = linksDict[variant.uri]
+                        let newUrl = masterUri.slice(0, masterUri.lastIndexOf('/'));
+                        rendition.uri = newUrl + "/" + rendition.uri
+
+                        let audioPayload = await fetch(rendition.uri);
+                        let audioPlaylist = await parsePlaylistData(audioPayload);
+                        maxAudioDuration = Math.max(maxAudioDuration, audioPlaylist.targetDuration)
+
+                        for (let segment of audioPlaylist.segments) {
+                            if (!isValidHttpUrl(segment.uri)) {
+                                let renditionUri = rendition.uri;
+                                let newUrl = renditionUri.slice(0, renditionUri.lastIndexOf('/'));
+                                segment.uri = newUrl + "/" + segment.uri
+                                segment.programDateTime = null
+                            }
+                        }
+                        audioSegments.push(...audioPlaylist.segments)
+                        maxAudioVersion = Math.max(maxAudioVersion, audioPlaylist.version)
+                    }
+                }
+            }
+
             for (let segment of playlist.segments) {
                 if (!isValidHttpUrl(segment.uri)) {
                     let variantUri = variant.uri;
@@ -216,6 +251,7 @@ async function joinSegments(neededRes) {
             maxBand = Math.max(maxBand, variant.bandwidth)
             maxVersion = Math.max(maxVersion, playlist.version)
         }
+
         let newPlaylist = new MediaPlaylist({
             segments: segments,
             endlist: true,
@@ -234,14 +270,45 @@ async function joinSegments(neededRes) {
             //file written successfully
         })
 
+        let audio = createAudioPlaylist(audioSegments, maxAudioDuration, maxAudioVersion)
+
         let newVariant = new Variant({
             uri: index + '.m3u8',
             resolution: res,
-            bandwidth: maxBand
+            bandwidth: maxBand,
+            audio: [audio]
         })
         repDict[index] = newVariant
     }
     createMasterPlaylist(neededRes) //remove duplicates from bandwidth
+}
+
+function createAudioPlaylist(audioSegments, maxAudioDuration, maxAudioVersion) {
+    let newAudioPlaylist = new MediaPlaylist({
+        segments: audioSegments,
+        endlist: true,
+        targetDuration: maxAudioDuration,
+        version: maxAudioVersion
+    })
+
+    const content = HLS.stringify(newAudioPlaylist)
+
+    fs.writeFile('audio.m3u8', content, err => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        //file written successfully
+    })
+
+    let rendition = new Rendition({
+        type: 'AUDIO',
+        uri: 'audio.m3u8',
+        groupId: 'audio',
+        name: 'audio'
+    })
+
+    return rendition;
 }
 
 function createMasterPlaylist(neededRes) {
