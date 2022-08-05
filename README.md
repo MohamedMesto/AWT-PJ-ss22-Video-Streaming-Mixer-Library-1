@@ -30,19 +30,24 @@ Video Streaming Mixer Library: In order to create e.g. playlists consisting of m
 ## Installation
 
 After creating your own Node JS application, run the following command to install the video mixer library:
-npm i awt-pj-ss22-video-streaming-mixer-library-1
+
+```npm i awt-pj-ss22-video-streaming-mixer-library-1```
 
 within your main.js file, import the algorithmA and algorithmB methods:
-const {algorithmA, algorithmB} = require('awt-pj-ss22-video-streaming-mixer-library-1')
 
-call algorithmA([urls]) or algorithmB([urls]) methods where [urls] is an array of strings made from different streams urls
+```const {algorithmA, algorithmB} = require('awt-pj-ss22-video-streaming-mixer-library-1')```
+
+call ```algorithmA([urls])``` or ```algorithmB([urls])``` methods where ```[urls]``` is an array of strings made from different streams urls
 
 then, run the methods in the command line:
-node main.js
+
+```node main.js```
 
 In order to see the final output video, have a localhost server running in your Node application directory, as follows:
+```
 cd [node app directory]
 python3 -m http.server
+```
 
 Then, on Safari browser or a Google Chrome Extension that supports HLS files, type localhost:8000/master.m3u8 to see the results.
 
