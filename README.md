@@ -29,7 +29,9 @@ Video Streaming Mixer Library: In order to create e.g. playlists consisting of m
 
 ## Installation
 
-After creating your own Node JS application, run the following command to install the video mixer library:
+This library was developed in Node JS. To use the methods developed, an external Node JS app has to be created to use the video mixer library as a dependency.
+
+Create your own Node JS application: https://code.visualstudio.com/docs/nodejs/nodejs-tutorial, then run the following command to install the video mixer library:
 
 ```npm i awt-pj-ss22-video-streaming-mixer-library-1```
 
