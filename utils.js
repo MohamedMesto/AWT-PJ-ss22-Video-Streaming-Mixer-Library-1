@@ -4,23 +4,22 @@ const { join } = require('path');
 const { Variant } = HLS.types;
 const fs = require('fs')
 
-//const urls = ["https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"]
-     //   "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8"]
-//"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"]
-//"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)"]
-//"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"]
-//"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)",
-//	"https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
-/*const urls = [//"https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8",//,"https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"]//"https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"]//",
-"https://d3rlna7iyyu8wu.cloudfront.net/skip_armstrong/skip_armstrong_stereo_subs.m3u8", "https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8"]*/
-//const urls = ["https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8", "https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8"] //"https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"]
-//const urls = ["https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8"] // WORKS
+let testURL = ["https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8",
+        "http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8",
+"https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)",
+"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
+"http://amssamples.streaming.mediaservices.windows.net/69fbaeba-8e92-4740-aedc-ce09ae945073/AzurePromo.ism/manifest(format=m3u8-aapl)",
+"https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
+"https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8","https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8",
+"https://d3rlna7iyyu8wu.cloudfront.net/skip_armstrong/skip_armstrong_stereo_subs.m3u8", "https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8",
+"https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8", "https://mtoczko.github.io/hls-test-streams/test-group/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8",
+"https://playertest.longtailvideo.com/adaptive/hls-test-streams/test-audio-pdt/playlist.m3u8", "https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/redundant.m3u8",
+"http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)", 
+"http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)",
+"http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8",
+"https://test-streams.mux.dev/test_001/stream.m3u8"]
 
-//const urls = ["http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)", 
-          //  "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"] // WORKS
-
-const urls = ["http://cdnapi.kaltura.com/p/1878761/sp/187876100/playManifest/entryId/1_2xvajead/flavorIds/1_tl01409m,1_kptb3ez8,1_re3akioy,1_wuylsxwp/format/applehttp/protocol/http/a.m3u8",
-"https://test-streams.mux.dev/test_001/stream.m3u8"] // works w/o audio
 let variantsDict = {};
 let linksDict = {};
 let objectsArr = [];
