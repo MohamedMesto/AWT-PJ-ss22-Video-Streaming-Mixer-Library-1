@@ -26,6 +26,7 @@ let objectsArr = [];
 let keys = ['width', 'height'];
 let repDict = {};
 
+// obtain object representation from master manifests
 async function parseStreamData(payload, uri) {
     const variants = [];
     let playlist = HLS.parse(await payload.text());
@@ -131,10 +132,10 @@ async function algorithmB(urlsArr) {
     makeRepDict(matchingArr, removeDuplicates(results))
 }
 
+// save variants for each matching resolution
 function makeRepDict(matchingArr, neededRep) {
     for (let playlist of matchingArr) {
 
-        // remove duplicates
         let newVariants = [];
         let visited = {};
         for (let variant of playlist.variants) {
@@ -172,6 +173,7 @@ function makeRepDict(matchingArr, neededRep) {
     joinSegments(neededRep)
 }
 
+// obatin matching variant
 function checkResolution(neededArr, variant) {
     let varTemp = new Variant(variant);
     let resolution = varTemp.resolution;
@@ -198,6 +200,7 @@ function isValidHttpUrl(string) {
     return url.protocol === "http:" || url.protocol === "https:";
 }
 
+// concatenate new video and audio segments for each matching variant
 async function joinSegments(neededRes) {
     for (let res of neededRes) {
         let index = res.width + 'x' + res.height;
@@ -295,9 +298,10 @@ async function joinSegments(neededRes) {
         }
         repDict[index] = newVariant
     }
-    createMasterPlaylist(neededRes) //remove duplicates from bandwidth
+    createMasterPlaylist(neededRes)
 }
 
+// write new audio medi playlist with audio segments all joined
 function createAudioPlaylist(audioSegments, maxAudioDuration, maxAudioVersion) {
     let newAudioPlaylist = new MediaPlaylist({
         segments: audioSegments,
@@ -326,6 +330,7 @@ function createAudioPlaylist(audioSegments, maxAudioDuration, maxAudioVersion) {
     return rendition;
 }
 
+// write final master playlist with matching variants media playlists and video/audio segments concatenated
 function createMasterPlaylist(neededRes) {
     let variants = [];
     for (let res of neededRes) {
@@ -349,11 +354,13 @@ function createMasterPlaylist(neededRes) {
     })
 }
 
+// parse manifest text into object representation
 async function parsePlaylistData(payload) {
     let playlist = HLS.parse(await payload.text());
     return playlist;
 }
 
+// obtain only resolutions attribute
 function getResolutions(variantsArr) {
     let result = [];
     for (let variant of variantsArr) {
