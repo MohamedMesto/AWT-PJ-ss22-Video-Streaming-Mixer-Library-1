@@ -39,6 +39,7 @@ async function parseStreamData(payload, uri) {
     return variants;
 }
 
+// fill variants dictionary
 async function setup(urlsArr) {
     for (let idx in urlsArr) {
         let payload = await fetch(urlsArr[idx]);
@@ -49,6 +50,7 @@ async function setup(urlsArr) {
 async function algorithmA(urlsArr) {
     await setup(urlsArr);
     console.log("Algorithm A");
+    // save resolutions from first stream url
     let neededResolutions = getResolutions(variantsDict[0])
     if (neededResolutions.length != 1) {
         neededResolutions.pop()
@@ -58,7 +60,7 @@ async function algorithmA(urlsArr) {
     neededResolutions = removeDuplicates(neededResolutions);
 
     console.log("First URL's resolutions:", neededResolutions);
-
+    // iterate all variants from all streams
     for (let idx in variantsDict) {
         if (idx != 0) {
             let resolutionsArr = getResolutions(variantsDict[idx]);
@@ -67,7 +69,7 @@ async function algorithmA(urlsArr) {
             resolutionsArr = removeDuplicates(resolutionsArr);
 
             let tempMatch = [];
-
+            //get resolutions that match with first stream
             for (let x of neededResolutions) {
                 for (let y of resolutionsArr) {
                     if (x.width == y.width && x.height == y.height) {
@@ -79,7 +81,7 @@ async function algorithmA(urlsArr) {
 
             let neededString = JSON.stringify(neededResolutions);
             let matchString = JSON.stringify(tempMatch);
-
+            // the resolutions retrieved must equal the first stream's
             if (neededString === matchString) {
                 matchingArr.push(objectsArr[idx])
                 console.log("Matching resolution from", urlsArr[idx], resolutionsArr);
@@ -88,6 +90,7 @@ async function algorithmA(urlsArr) {
             }
         }
     }
+    // create master manifest
     makeRepDict(matchingArr, neededResolutions)
 }
 
@@ -95,6 +98,7 @@ async function algorithmB(urlsArr) {
     await setup(urlsArr)
     console.log("Algorithm B");
     let resolutions = [];
+    // obtain all resolutions
     for (let idx in variantsDict) {
         let tempArr = getResolutions(variantsDict[idx])
         if (tempArr.length != 1) {
@@ -106,7 +110,7 @@ async function algorithmB(urlsArr) {
     }
     let results = [];
     let matchingArr = [];
-
+    // find intersection
     for (let idx in resolutions) {
         let arr = resolutions[idx];
         for (let obj of arr) {
@@ -121,6 +125,7 @@ async function algorithmB(urlsArr) {
                     }
                 }
             }
+            // intersections exists if number of times a resolution appears equals the amount of elements in the array
             if (contFound == resolutions.length - 1) {
                 if (!matchingArr.includes(objectsArr[idx])) {
                     matchingArr.push(objectsArr[idx])
@@ -129,6 +134,7 @@ async function algorithmB(urlsArr) {
             }
         }
     }
+    // create master manifest
     makeRepDict(matchingArr, removeDuplicates(results))
 }
 
@@ -155,25 +161,27 @@ function makeRepDict(matchingArr, neededRep) {
                             }
                         }
                     }
+                    // handle relativ url paths
                     if (!isValidHttpUrl(selectedVar.uri)) {
                         let masterUri = playlist.uri;
                         const newUrl = masterUri.slice(0, masterUri.lastIndexOf('/'));
                         selectedVar.uri = newUrl + "/" + selectedVar.uri
                         linksDict[selectedVar.uri] = masterUri
-                    }
+                    } 
                     newVariants.push(selectedVar)
                 }
             }
         }
-
+        // from the matching streams, find the variants that matched
         for (let variant of newVariants) {
             checkResolution(neededRep, variant)
         }
     }
+    // concatenate video and audio segments in the same media playlist
     joinSegments(neededRep)
 }
 
-// obatin matching variant
+// obtain matching variant
 function checkResolution(neededArr, variant) {
     let varTemp = new Variant(variant);
     let resolution = varTemp.resolution;
@@ -216,8 +224,9 @@ async function joinSegments(neededRes) {
         for (let variant of variants) {
             let payload = await fetch(variant.uri);
             let playlist = await parsePlaylistData(payload);
+            // handle target duration tag
             maxDuration = Math.max(maxDuration, playlist.targetDuration)
-
+            // join audio segments
             let found = false
             for (let index in variant.audio) {
                 let audio = variant.audio[index]
@@ -250,7 +259,7 @@ async function joinSegments(neededRes) {
                     }
                 }
             }
-
+            // join video segments
             for (let index in playlist.segments) {
                 let segment = playlist.segments[index]
                 if (!isValidHttpUrl(segment.uri)) {
@@ -267,7 +276,7 @@ async function joinSegments(neededRes) {
             maxBand = Math.max(maxBand, variant.bandwidth)
             maxVersion = Math.max(maxVersion, playlist.version)
         }
-
+        // create variant playlist manifest
         let newPlaylist = new MediaPlaylist({
             segments: segments,
             endlist: true,
@@ -285,13 +294,13 @@ async function joinSegments(neededRes) {
             }
             //file written successfully
         })
-
+        // create new master manifest variant object
         let newVariant = new Variant({
             uri: index + '.m3u8',
             resolution: res,
             bandwidth: maxBand
         })
-
+        // add audio attribute only audio tracks were present
         if (audioSegments.length != 0) {
             let audio = createAudioPlaylist(audioSegments, maxAudioDuration, maxAudioVersion)
             newVariant.audio = [audio]
