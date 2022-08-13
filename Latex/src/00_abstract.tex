@@ -1,0 +1,9 @@
+Adaptive Bitrate Streaming is now the standard for the biggest streaming and video player platforms online. Data is now shared over the internet dynamically, adjusting the video resolution to the user's internet capabilities to provide a better experience. In this work, we present a proof of concept to implement two strategies that join multiple video streams into a single one only if they have matching resolutions. The motivation for this research comes from the necessity to improve the user experience and to test a new way to consume media content online. To do so, we develop a library dependency with two strategies to find matching resolutions, one that only matches the resolution of the first stream in the list, and the second, the intersection of all resolutions. Our library is implemented as a Node JS package for external applications to import. Results show the Master Manifest playlist being written with all streams content concatenated in a single one. Moreover, no playback errors were presented when the video player switches between streams as long as they have the same format regarding audio tracks. 
+
+
+
+
+\begin{IEEEkeywords}
+video streaming, HLS, adaptive bitrate streaming, media playlist, video segments, HLS Parser, mixer library
+
+\end{IEEEkeywords}

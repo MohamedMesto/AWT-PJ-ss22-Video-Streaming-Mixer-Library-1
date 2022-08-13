@@ -1,0 +1,147 @@
+\section{\textbf{Results and Discussion}}\label{sec:Evaluation} 
+
+To test the Master Manifests, Safari Web Browser was used as it has native HLS support in its video player. The VLC video player was an option but it produced playback errors when switching streams, the player restarted the counter instead of having continuity. Native HLS Playback Google Chrome extension was also tested, but it produced playback errors between streams. Safari had the best performance for testing. The idea is to have the streams mixed into a single stream playing sequentially.
+
+Because we are writing the master manifest in a local file on our computer, we need a localhost server running so the videos can be played in Safari. We used the following python command in the Unix environment:  \Verb|python3 -m http.server|
+To play the stream in the Safari search bar, one types \textcolor{blue}{http://localhost:8000/master.m3u8}
+
+We also have a Node JS testing application which will serve us as our external application and imports the video mixer library as a dependency. This application has a main.js file that calls the \Verb|algorithmA()| and \Verb|algorithmB()| methods.
+
+\subsection{Strategy 1}
+
+We tested the first strategy, which consists of having as an output a final manifest that will have the representations present only for the first element of the input array. In this case, we made an HLS file which is hosted in our computer for testing purposes. The Node JS application calls the first strategy method with three input streams:
+
+\begin{lstlisting}
+algorithmA(["http://localhost:8000/puskasStream/master.m3u8",
+    "https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
+    "https://test-streams.mux.dev/pts_shift/master.m3u8"])
+\end{lstlisting}
+
+The three streams have respectively these resolutions: 
+
+\begin{itemize}
+\item 1280x720
+\item 304x128, 384x160, 544x224, 736x304, 960x400, 1264x528
+\item 480x270, 768x432, 864x486, 1280x720
+\end{itemize}
+
+Once the localhost server was running, we tested the first strategy. The first URL's resolution, which is the needed resolution, is 1280x720 and it is not present in the second stream but it is in the third one. Our final manifest as an output from the algorithm will have only one variant which is 1280x720 and makes a reference to the media playlist file that was created for this representation. The playlist file has all the segments from the two streams concatenated in a single list.
+
+Here is the resulting Master Manifest which has the only resolution present in the first input stream, 1280x720. This variant has a media playlist and it does not include an audio track because the video segments have them integrated.
+
+\begin{lstlisting}
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=2320000,
+RESOLUTION=1280x720
+1280x720.m3u8
+\end{lstlisting}
+
+Here is the media playlist manifest (simplified) for the 1280x720 resolution. This playlist has all the video segments from the two streams concatenated in a single list. In between the two streams, the \#EXT-X-DISCONTINUITY tag has to be inserted.
+
+\begin{lstlisting}
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:16
+#EXT-X-DISCONTINUITY
+#EXTINF:11.533333,
+http://localhost:8000/puskasStream/All Puskas Award Winners (2009-2021)0.ts
+#EXTINF:8.5,
+http://localhost:8000/puskasStream/All Puskas Award Winners (2009-2021)1.ts
+...
+#EXT-X-DISCONTINUITY
+#EXTINF:4.736,
+https://test-streams.mux.dev/pts_shift/media-uoj0it22v_0.ts
+#EXTINF:4.8,
+https://test-streams.mux.dev/pts_shift/media-uoj0it22v_1.ts
+...
+\end{lstlisting}
+
+\subsection{Strategy 2}
+
+We tested the second strategy, which consists of the intersection of resolutions from the input URLs. The Node JS application calls the second strategy method with two input streams: 
+
+\begin{lstlisting}
+algorithmB(["http://amssamples.streaming.mediaservices.windows.net/634cd01c-6822-4630-8444-8dd6279f94c6/CaminandesLlamaDrama4K.ism/manifest(format=m3u8-aapl)", 
+    "http://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=m3u8-aapl)"])
+\end{lstlisting}
+
+The two streams have respectively these resolutions: 
+
+\begin{itemize}
+\item 640x360, 960x540, 1280x720, 1920x1080, 2560x1440, 3840x2160, 4096x2304
+\item 320x180, 640x360, 960x540, 1280x720, 1920x1080
+\end{itemize}
+
+The intersection of all resolutions is: 640x360, 960x540, 1280x720 and 1920x1080
+
+For simplicity, we are going to call Stream1 and Stream2 to replace the URLs in the video segments addresses, also, we are not listing the complete playlist.
+
+We can see that for these three streams we have four representations resulting from the intersection. The representations 640p, 960p, 1280p, and 1920p are present in these three streams. We have as output files four representations along with the master manifest. We can see that our master manifest has now four variants, each of them referring to the media playlist file which has the name of the resolution. We have all the segments or clips concatenated for the three streams.
+
+Here is the resulting Master Manifest from the intersection of the resolutions from the input streams. Four variants are present, each with its m3u8 playlist manifest. The two matching streams each had audio tracks themselves, so each variant refers to the audio track.
+
+\begin{lstlisting}
+#EXTM3U
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",
+NAME="audio",URI="audio.m3u8"
+#EXT-X-STREAM-INF:BANDWIDTH=1355199,
+RESOLUTION=640x360,AUDIO="audio"
+640x360.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2532741,
+RESOLUTION=960x540,AUDIO="audio"
+960x540.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2532741,
+RESOLUTION=1280x720,AUDIO="audio"
+1280x720.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2532741,
+RESOLUTION=1920x1080,AUDIO="audio"
+1920x1080.m3u8
+\end{lstlisting}
+
+Here is the audio playlist manifest (simplified). This playlist has all the audio segments from the two streams concatenated in a single list. In between the two streams, the \#EXT-X-DISCONTINUITY tag has to be inserted.
+
+\begin{lstlisting}
+#EXTM3U
+#EXT-X-VERSION:4
+#EXT-X-TARGETDURATION:11
+#EXT-X-DISCONTINUITY
+#EXTINF:10.026667
+Stream1/QualityLevels(384000)/Fragments(aac_UND_6_384=100266666,format=m3u8-aapl)
+#EXTINF:10.026667
+Stream1/QualityLevels(384000)/Fragments(aac_UND_6_384=200533333,format=m3u8-aapl)
+...
+#EXT-X-DISCONTINUITY
+#EXTINF:10.10068
+Stream2/QualityLevels(53620)/Fragments(AAC_und_ch2_56kbps=101006802,format=m3u8-aapl)
+#EXTINF:10.10068
+Stream2/QualityLevels(53620)/Fragments(aac_UND_6_384=300800000,format=m3u8-aapl)
+...
+\end{lstlisting}
+
+Here is the media playlist manifest (simplified) for the 640x360 resolution. This playlist has all the video segments from the two streams concatenated in a single list. In between the two streams, the \#EXT-X-DISCONTINUITY tag has to be inserted.
+
+\begin{lstlisting}
+#EXTM3U
+#EXT-X-VERSION:4
+#EXT-X-TARGETDURATION:11
+#EXT-X-DISCONTINUITY
+#EXTINF:10
+Stream1/QualityLevels(926058)/Fragments(video=100000000,format=m3u8-aapl)
+#EXTINF:10
+Stream1/QualityLevels(926058)/Fragments(video=200000000,format=m3u8-aapl)
+...
+#EXT-X-DISCONTINUITY
+#EXTINF:10.01
+Stream2/QualityLevels(642832)/Fragments(video=100100000,format=m3u8-aapl)
+#EXTINF:10.01
+Stream2/QualityLevels(642832)/Fragments(video=200200000,format=m3u8-aapl)
+..
+\end{lstlisting}
+
+\subsection{Discussion}
+
+We can see that every time a playlist switches to a different content source (different stream), we add the \#EXT-X-DISCONTINUITY tag. The EXT-X-DISCONTINUITY tag indicates a discontinuity between the Media Segment that follows it and the one that preceded it. The EXT-X-DISCONTINUITY tag must be present if there is a change in file format or encoding parameters \cite{refs}. The client must be prepared to reset its parser and decoder before playing a Media Segment that has an EXT-X-DISCONTINUITY tag applied to it; otherwise, playback errors can occur. During the testing phase, when the tag was not present, the playback was failing when the player tried to switch to the next stream.
+   
+One use-case this project did not cover was mixing a stream that has audio tracks with one that doesn't. This would require, for future work, playing the audio playlist only in its correspondent video timestamp. It is assumed that timestamp manipulation is supported in HLS. Without timestamp manipulation, the stream that has audio integrated into each video segment plays with audio normally, when the player switches to the next stream, it has no audio because it depends on the audio tracks that were left out.
+
+Additionally, if audio tracks are present in all matching streams, only one audio track is being included, for example, English audio. If other languages were available, the video mixer library would only choose the default audio.
