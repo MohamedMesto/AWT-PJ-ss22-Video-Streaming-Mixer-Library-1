@@ -63,6 +63,7 @@ the figures are created via Draw.io
 
 ## Evaluation Grade from Quality and Usability Lab
 1.7
+
 ![](Images/awt-pj-ss22-video-streaming-mixer-library-1.png)
 
 ## License & copyright
