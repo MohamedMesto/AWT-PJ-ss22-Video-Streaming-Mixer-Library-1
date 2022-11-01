@@ -61,6 +61,10 @@ the figures are created via Draw.io
 - Yuni Amaloa Quintero Villalobos, Quintero.villalobos@campus.tu-berlin.de
 - Poonam Kumari Roy, Poonam.k.roy@campus.tu-berlin.de
 
+## Evaluation Grade from Quality and Usability Lab
+1.7
+
+
 ## License & copyright
 © Yuni Amaloa Quintero Villalobos, Poonam Kumari Roy and Mohamed Mesto
 License under the [MIT License] (LICENSE).
