@@ -63,13 +63,13 @@ the figures are created via Draw.io
 
 ## Evaluation Grade from Quality and Usability Lab
 1.7
-
+![](Images/awt-pj-ss22-video-streaming-mixer-library-1.png)
 
 ## License & copyright
 © Yuni Amaloa Quintero Villalobos, Poonam Kumari Roy and Mohamed Mesto
 License under the [MIT License] (LICENSE).
 
-![](AWT2022VideoStreamingMixerLibrary.jpg)
+
 ![](Images/AWT2022_2.jpg)
 ![](Images/AWT2022_3.jpg)
 ![](Images/AWT2022_4.jpg)
